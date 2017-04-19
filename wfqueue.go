@@ -1,7 +1,9 @@
 package wfqueue
 
-import "sync/atomic"
-import "strconv"
+import (
+	"strconv"
+	"sync/atomic"
+)
 
 // Node represents a Node in Wait Free Queue
 type Node struct {
@@ -136,6 +138,16 @@ func (queue *WFQueue) String() string {
 	}
 
 	return res
+}
+
+// Head returns the head element of the queue
+func (queue *WFQueue) Head() int {
+	return queue.head.Load().(*Node).value
+}
+
+// Tail returns the tail element of the queue
+func (queue *WFQueue) Tail() int {
+	return queue.tail.Load().(*Node).value
 }
 
 // -------------------------------------------------
@@ -276,12 +288,4 @@ func (queue *WFQueue) maxPhase() int {
 
 func (queue *WFQueue) isStillPending(tid, phase int) bool {
 	return queue.state[tid].Load().(*OpDesc).pending && queue.state[tid].Load().(*OpDesc).phase <= phase
-}
-
-func (queue *WFQueue) Head() int {
-	return queue.head.Load().(*Node).value
-}
-
-func (queue *WFQueue) Tail() int {
-	return queue.tail.Load().(*Node).value
 }

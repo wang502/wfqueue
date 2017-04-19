@@ -18,6 +18,7 @@ var (
 		operation{-1, false},
 		operation{5, true},
 		operation{-1, false},
+		operation{-1, false},
 	}
 )
 
@@ -122,3 +123,45 @@ func BenchmarkWFQueueDequeue(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkWFQueueEnqueueDequeue(b *testing.B) {
+	numItems := 1000
+
+	qs := make([]*WFQueue, b.N)
+	for i := 0; i < b.N; i++ {
+		qs[i] = NewWFQueue(10)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		queue := qs[i]
+		for j := 0; j < numItems/len(operations); j++ {
+			for _, op := range operations {
+				if op.enqueue {
+					queue.Enqueue(op.value, 0)
+				} else {
+					queue.Dequeue(0)
+				}
+			}
+		}
+	}
+}
+
+/*
+func BenchmarkChannelEnqueue(b *testing.B) {
+	numItems := 1000
+
+	qs := make([]chan int, b.N)
+	for i := 0; i < b.N; i++ {
+		qs[i] = make(chan int, numItems)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		queue := qs[i]
+		for j := 0; j < numItems; j++ {
+			queue <- j
+		}
+	}
+}
+*/

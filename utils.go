@@ -19,3 +19,11 @@ func compareAndSwapOpDesc(dest *atomic.Value, old *OpDesc, new *OpDesc) bool {
 	}
 	return false
 }
+
+func compareAndSetID(dest *atomic.Value, old int, new int) bool {
+	if dest.Load().(int) == old {
+		dest.Store(new)
+		return true
+	}
+	return false
+}

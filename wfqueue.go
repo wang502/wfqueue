@@ -84,8 +84,8 @@ func NewWFQueue(numThreads int) *WFQueue {
 func (queue *WFQueue) Enqueue(value, tid int) {
 	phase := queue.maxPhase()
 	queue.state[tid].Store(NewOpDesc(phase, true, true, NewNode(value, tid)))
-	queue.help(tid)
-
+	queue.help(phase)
+	queue.helpEnqueueFinish()
 }
 
 // Dequeue dequeues value from WFQueue
@@ -112,9 +112,7 @@ func (queue *WFQueue) Len() int {
 			break
 		}
 		node := head.(*Node)
-		if node.value != -1 {
-			num++
-		}
+		num++
 		head = node.next.Load()
 	}
 
@@ -197,7 +195,6 @@ func (queue *WFQueue) helpEnqueueFinish() {
 		curDesc := queue.state[tid].Load().(*OpDesc)
 		if last == queue.tail.Load().(*Node) && queue.state[tid].Load().(*OpDesc).node == next {
 			newDesc := NewOpDesc(queue.state[tid].Load().(*OpDesc).phase, false, true, next)
-			//queue.state[tid].Store(newDesc)
 			compareAndSwapOpDesc(queue.state[tid], curDesc, newDesc)
 			compareAndSwapNode(queue.tail, last, next)
 		}
@@ -239,7 +236,7 @@ func (queue *WFQueue) helpDequeue(tid, phase int) {
 					}
 				}
 
-				first.deqTid.Store(tid)
+				compareAndSetID(first.deqTid, -1, tid)
 				queue.helpDequeueFinish()
 			}
 		}
@@ -279,4 +276,12 @@ func (queue *WFQueue) maxPhase() int {
 
 func (queue *WFQueue) isStillPending(tid, phase int) bool {
 	return queue.state[tid].Load().(*OpDesc).pending && queue.state[tid].Load().(*OpDesc).phase <= phase
+}
+
+func (queue *WFQueue) Head() int {
+	return queue.head.Load().(*Node).value
+}
+
+func (queue *WFQueue) Tail() int {
+	return queue.tail.Load().(*Node).value
 }

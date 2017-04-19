@@ -9,6 +9,7 @@ import (
 func main() {
 	numThreads := 10
 	queue := wfqueue.NewWFQueue(numThreads)
+
 	fmt.Printf("queue size: %d\n", queue.Len())
 	done := make(chan bool, numThreads)
 	for i := 0; i < 10; i++ {
@@ -44,9 +45,12 @@ func main() {
 	queue.Enqueue(10, 0)
 	fmt.Printf("queue: %s\n", queue)
 	fmt.Printf("queue size: %d\n", queue.Len())
+	fmt.Printf("head: %d\n", queue.Head())
+	fmt.Printf("tail: %d\n", queue.Tail())
 
-	fmt.Printf("enqueue: 11\n")
-	queue.Enqueue(11, 0)
+	v, ok := queue.Dequeue(1)
+	if ok {
+		fmt.Printf("dequeued: %d\n", v)
+	}
 	fmt.Printf("queue: %s\n", queue)
-	fmt.Printf("queue size: %d\n", queue.Len())
 }

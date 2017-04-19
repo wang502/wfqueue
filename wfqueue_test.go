@@ -83,3 +83,42 @@ func TestDequeue(t *testing.T) {
 		t.Errorf("queue size is expected to empty, but returned size %d instead", q.Len())
 	}
 }
+
+func BenchmarkWFQueueEnqueue(b *testing.B) {
+	numItems := 1000
+
+	qs := make([]*WFQueue, b.N)
+	for i := 0; i < b.N; i++ {
+		qs[i] = NewWFQueue(10)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for j := 0; j < numItems; j++ {
+			qs[i].Enqueue(j, 0)
+		}
+	}
+}
+
+func BenchmarkWFQueueDequeue(b *testing.B) {
+	numItems := 1000
+
+	qs := make([]*WFQueue, b.N)
+	for i := 0; i < b.N; i++ {
+		qs[i] = NewWFQueue(10)
+	}
+	for i := 0; i < b.N; i++ {
+		queue := qs[i]
+		for j := 0; j < numItems; j++ {
+			queue.Enqueue(j, 0)
+		}
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		queue := qs[i]
+		for j := 0; j < numItems; j++ {
+			queue.Dequeue(0)
+		}
+	}
+}

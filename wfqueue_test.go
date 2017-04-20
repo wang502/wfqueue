@@ -22,7 +22,7 @@ var (
 	}
 )
 
-func TestEnqueue(t *testing.T) {
+func TestWFQueueEnqueue(t *testing.T) {
 	tid := 1
 	q := NewWFQueue(10)
 
@@ -53,7 +53,7 @@ func TestEnqueue(t *testing.T) {
 	}
 }
 
-func TestDequeue(t *testing.T) {
+func TestWFQueueDequeue(t *testing.T) {
 	tid := 1
 	q := NewWFQueue(10)
 
@@ -95,8 +95,9 @@ func BenchmarkWFQueueEnqueue(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		queue := qs[i]
 		for j := 0; j < numItems; j++ {
-			qs[i].Enqueue(j, 0)
+			queue.Enqueue(j, 0)
 		}
 	}
 }
@@ -146,22 +147,3 @@ func BenchmarkWFQueueEnqueueDequeue(b *testing.B) {
 		}
 	}
 }
-
-/*
-func BenchmarkChannelEnqueue(b *testing.B) {
-	numItems := 1000
-
-	qs := make([]chan int, b.N)
-	for i := 0; i < b.N; i++ {
-		qs[i] = make(chan int, numItems)
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		queue := qs[i]
-		for j := 0; j < numItems; j++ {
-			queue <- j
-		}
-	}
-}
-*/

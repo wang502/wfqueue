@@ -27,3 +27,11 @@ func compareAndSetID(dest *atomic.Value, old int, new int) bool {
 	}
 	return false
 }
+
+func compareAndSwapQueueNode(dest *atomic.Value, old *QueueNode, new *QueueNode) bool {
+	if dest.Load() == nil || dest.Load().(*QueueNode) == old {
+		dest.Store(new)
+		return true
+	}
+	return false
+}

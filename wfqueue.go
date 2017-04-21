@@ -182,7 +182,7 @@ func (queue *WFQueue) helpEnqueue(tid, phase int) {
 		if last == queue.tail.Load().(*Node) {
 			if next == nil {
 				if queue.isStillPending(tid, phase) {
-					if compareAndSwapNode(last.next, next, queue.state[tid].Load().(*OpDesc).node) {
+					if compareAndSwap(last.next, next, queue.state[tid].Load().(*OpDesc).node) {
 						queue.helpEnqueueFinish()
 						return
 					}
@@ -207,8 +207,8 @@ func (queue *WFQueue) helpEnqueueFinish() {
 		curDesc := queue.state[tid].Load().(*OpDesc)
 		if last == queue.tail.Load().(*Node) && queue.state[tid].Load().(*OpDesc).node == next {
 			newDesc := NewOpDesc(queue.state[tid].Load().(*OpDesc).phase, false, true, next)
-			compareAndSwapOpDesc(queue.state[tid], curDesc, newDesc)
-			compareAndSwapNode(queue.tail, last, next)
+			compareAndSwap(queue.state[tid], curDesc, newDesc)
+			compareAndSwap(queue.tail, last, next)
 		}
 	}
 }
@@ -230,7 +230,7 @@ func (queue *WFQueue) helpDequeue(tid, phase int) {
 					curDesc := queue.state[tid].Load().(*OpDesc)
 					if last == queue.tail.Load().(*Node) && queue.isStillPending(tid, phase) {
 						newDesc := NewOpDesc(queue.state[tid].Load().(*OpDesc).phase, false, false, nil)
-						compareAndSwapOpDesc(queue.state[tid], curDesc, newDesc)
+						compareAndSwap(queue.state[tid], curDesc, newDesc)
 					}
 				} else {
 					queue.helpEnqueueFinish()
@@ -243,12 +243,12 @@ func (queue *WFQueue) helpDequeue(tid, phase int) {
 				}
 				if first == queue.head.Load().(*Node) && node != first {
 					newDesc := NewOpDesc(queue.state[tid].Load().(*OpDesc).phase, true, false, first)
-					if !compareAndSwapOpDesc(queue.state[tid], curDesc, newDesc) {
+					if !compareAndSwap(queue.state[tid], curDesc, newDesc) {
 						continue
 					}
 				}
 
-				compareAndSetID(first.deqTid, -1, tid)
+				compareAndSwap(first.deqTid, -1, tid)
 				queue.helpDequeueFinish()
 			}
 		}
@@ -269,8 +269,8 @@ func (queue *WFQueue) helpDequeueFinish() {
 		curDesc := queue.state[tid].Load().(*OpDesc)
 		if first == queue.head.Load().(*Node) && next != nil {
 			newDesc := NewOpDesc(queue.state[tid].Load().(*OpDesc).phase, false, false, queue.state[tid].Load().(*OpDesc).node)
-			compareAndSwapOpDesc(queue.state[tid], curDesc, newDesc)
-			compareAndSwapNode(queue.head, first, next)
+			compareAndSwap(queue.state[tid], curDesc, newDesc)
+			compareAndSwap(queue.head, first, next)
 		}
 	}
 }

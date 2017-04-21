@@ -51,13 +51,13 @@ func (queue *LFQueue) Enqueue(val int) {
 		}
 		if last == queue.tail.Load().(*QueueNode) {
 			if next == nil {
-				if compareAndSwapQueueNode(last.next, nil, newNode) {
-					compareAndSwapQueueNode(queue.tail, last, newNode)
+				if compareAndSwap(last.next, nil, newNode) {
+					compareAndSwap(queue.tail, last, newNode)
 					return
 				}
 			}
 		} else {
-			compareAndSwapQueueNode(queue.tail, last, next)
+			compareAndSwap(queue.tail, last, next)
 			return
 		}
 	}
@@ -77,7 +77,7 @@ func (queue *LFQueue) Dequeue() (int, bool) {
 
 		if first == queue.head.Load().(*QueueNode) {
 			if first != last && next != nil {
-				if compareAndSwapQueueNode(queue.head, first, next) {
+				if compareAndSwap(queue.head, first, next) {
 					return next.value, true
 				}
 			} else {

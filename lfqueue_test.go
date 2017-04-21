@@ -47,9 +47,27 @@ func TestLFQueueDequeue(t *testing.T) {
 
 }
 
-func BenchmarkLFQueueEnqueue(b *testing.B) {
-	numItems := 1000
+func BenchmarkLFQueueEnqueue10Items(b *testing.B) {
+	benchmarkLFQueueEnqueue(10, 1, b)
+}
 
+func BenchmarkLFQueueEnqueue100Items(b *testing.B) {
+	benchmarkLFQueueEnqueue(100, 1, b)
+}
+
+func BenchmarkLFQueueEnqueue1000Items(b *testing.B) {
+	benchmarkLFQueueEnqueue(1000, 1, b)
+}
+
+func BenchmarkLFQueueEnqueue10000Items(b *testing.B) {
+	benchmarkLFQueueEnqueue(10000, 1, b)
+}
+
+func BenchmarkLFQueueEnqueue100000Items(b *testing.B) {
+	benchmarkLFQueueEnqueue(100000, 1, b)
+}
+
+func benchmarkLFQueueEnqueue(numItems, numThreads int, b *testing.B) {
 	qs := make([]*LFQueue, b.N)
 	for i := 0; i < b.N; i++ {
 		qs[i] = NewLFQueue()
@@ -64,9 +82,27 @@ func BenchmarkLFQueueEnqueue(b *testing.B) {
 	}
 }
 
-func BenchmarkLFQueueDequeue(b *testing.B) {
-	numItems := 1000
+func BenchmarkLFQueueDequeue10Items(b *testing.B) {
+	benchmarkLFQueueDequeue(10, 1, b)
+}
 
+func BenchmarkLFQueueDequeue100Items(b *testing.B) {
+	benchmarkLFQueueDequeue(100, 1, b)
+}
+
+func BenchmarkLFQueueDequeue1000Items(b *testing.B) {
+	benchmarkLFQueueDequeue(1000, 1, b)
+}
+
+func BenchmarkLFQueueDequeue10000Items(b *testing.B) {
+	benchmarkLFQueueDequeue(10000, 1, b)
+}
+
+func BenchmarkLFQueueDequeue100000Items(b *testing.B) {
+	benchmarkLFQueueDequeue(100000, 1, b)
+}
+
+func benchmarkLFQueueDequeue(numItems, numThreads int, b *testing.B) {
 	qs := make([]*LFQueue, b.N)
 	for i := 0; i < b.N; i++ {
 		qs[i] = NewLFQueue()

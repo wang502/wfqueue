@@ -85,12 +85,30 @@ func TestWFQueueDequeue(t *testing.T) {
 	}
 }
 
-func BenchmarkWFQueueEnqueue(b *testing.B) {
-	numItems := 1000
+func BenchmarkWFQueueEnqueue10Items(b *testing.B) {
+	benchmarkWFQueueEnqueue(10, 1, b)
+}
 
+func BenchmarkWFQueueEnqueue100Items(b *testing.B) {
+	benchmarkWFQueueEnqueue(100, 1, b)
+}
+
+func BenchmarkWFQueueEnqueue1000Items(b *testing.B) {
+	benchmarkWFQueueEnqueue(1000, 1, b)
+}
+
+func BenchmarkWFQueueEnqueue10000Items(b *testing.B) {
+	benchmarkWFQueueEnqueue(10000, 1, b)
+}
+
+func BenchmarkWFQueueEnqueue100000Items(b *testing.B) {
+	benchmarkWFQueueEnqueue(100000, 1, b)
+}
+
+func benchmarkWFQueueEnqueue(numItems, numThreads int, b *testing.B) {
 	qs := make([]*WFQueue, b.N)
 	for i := 0; i < b.N; i++ {
-		qs[i] = NewWFQueue(10)
+		qs[i] = NewWFQueue(numThreads)
 	}
 
 	b.ResetTimer()
@@ -102,12 +120,30 @@ func BenchmarkWFQueueEnqueue(b *testing.B) {
 	}
 }
 
-func BenchmarkWFQueueDequeue(b *testing.B) {
-	numItems := 1000
+func BenchmarkWFQueueDequeue10Items(b *testing.B) {
+	benchmarkWFQueueDequeue(10, 1, b)
+}
 
+func BenchmarkWFQueueDequeue100Items(b *testing.B) {
+	benchmarkWFQueueDequeue(100, 1, b)
+}
+
+func BenchmarkWFQueueDequeue1000Items(b *testing.B) {
+	benchmarkWFQueueDequeue(1000, 1, b)
+}
+
+func BenchmarkWFQueueDequeue10000Items(b *testing.B) {
+	benchmarkWFQueueDequeue(10000, 1, b)
+}
+
+func BenchmarkWFQueueDequeue100000Items(b *testing.B) {
+	benchmarkWFQueueDequeue(100000, 1, b)
+}
+
+func benchmarkWFQueueDequeue(numItems, numThreads int, b *testing.B) {
 	qs := make([]*WFQueue, b.N)
 	for i := 0; i < b.N; i++ {
-		qs[i] = NewWFQueue(10)
+		qs[i] = NewWFQueue(numThreads)
 	}
 	for i := 0; i < b.N; i++ {
 		queue := qs[i]

@@ -1,0 +1,5 @@
+BenchmarkLFQueueConcurrentEnqueue10Items-4        300000              5525 ns/op
+BenchmarkLFQueueConcurrentEnqueue100Items-4        10000            191915 ns/op
+BenchmarkLFQueueConcurrentEnqueue1000Items-4        2000           4726357 ns/op
+BenchmarkLFQueueConcurrentEnqueue10000Items-4                100         380942638 ns/op
+BenchmarkLFQueueConcurrentEnqueue100000Items-4                20         104126073 ns/op

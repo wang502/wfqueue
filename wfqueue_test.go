@@ -1,6 +1,8 @@
 package wfqueue
 
-import "testing"
+import (
+	"testing"
+)
 
 type operation struct {
 	value   int
@@ -182,4 +184,62 @@ func BenchmarkWFQueueEnqueueDequeue(b *testing.B) {
 			}
 		}
 	}
+}
+
+func BenchmarkWFQueueConcurrentEnqueue10Items(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(10, 2, b)
+}
+
+func BenchmarkWFQueueConcurrentEnqueue100Items(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(100, 2, b)
+}
+
+func BenchmarkWFQueueConcurrentEnqueue1000Items(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(1000, 2, b)
+}
+
+func BenchmarkWFQueueConcurrentEnqueue10000Items(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(10000, 2, b)
+}
+
+func benchmarkWFQueueConcurrentEnqueue(numItems, numThreads int, b *testing.B) {
+	qs := make([]*WFQueue, b.N)
+	for i := 0; i < b.N; i++ {
+		qs[i] = NewWFQueue(numThreads)
+	}
+
+	total := numItems * b.N
+	doneChan := make(chan bool, total)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		//queue := NewWFQueue(numThreads)
+		queue := qs[i]
+		for j := 0; j < numItems; j++ {
+			go func(v int, queue *WFQueue) {
+				queue.Enqueue(v, v%numThreads)
+				doneChan <- true
+			}(j, queue)
+		}
+	}
+
+	for k := 0; k < total; k++ {
+		<-doneChan
+	}
+}
+
+func BenchmarkWFQueueConcurrrentEnqueue10MaxThreads(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(10, 10, b)
+}
+
+func BenchmarkWFQueueConcurrrentEnqueue100MaxThreads(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(100, 100, b)
+}
+
+func BenchmarkWFQueueConcurrrentEnqueue1000MaxThreads(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(100, 1000, b)
+}
+
+func BenchmarkWFQueueConcurrrentEnqueue10000MaxThreads(b *testing.B) {
+	benchmarkWFQueueConcurrentEnqueue(100, 10000, b)
 }

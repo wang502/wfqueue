@@ -14,23 +14,21 @@ func enqueueItems() {
 	numThreads, _ := strconv.Atoi(os.Args[2])
 
 	queue := wfqueue.NewLFQueue()
-	doneChan := make(chan bool, numItems)
-	start := time.Now()
-	ch := make(chan bool, numThreads)
+	doneChan := make(chan bool, numItems*numThreads)
 
-	for i := 0; i < numItems; i++ {
-		ch <- true
-		go func(v int, ch chan bool) {
-			queue.Enqueue(v)
-			doneChan <- true
-			<-ch
-		}(i, ch)
+	start := time.Now()
+	for i := 0; i < numThreads; i++ {
+		go func() {
+			for j := 0; j < numItems; j++ {
+				queue.Enqueue(j)
+				doneChan <- true
+			}
+		}()
 	}
 
-	for j := 0; j < numItems; j++ {
+	for n := 0; n < numItems*numThreads; n++ {
 		<-doneChan
 	}
-
 	elapsed := time.Since(start)
 	fmt.Printf("[LF][%d threads][%d items] enqueue takes %fs\n", numThreads, numItems, elapsed.Seconds())
 }
@@ -40,25 +38,24 @@ func enqueueDequeuePair() {
 	numThreads, _ := strconv.Atoi(os.Args[2])
 
 	queue := wfqueue.NewLFQueue()
-	doneChan := make(chan bool, numTimes)
+	doneChan := make(chan bool, numTimes*numThreads)
 	start := time.Now()
-	ch := make(chan bool, numThreads)
 
-	for i := 0; i < numTimes; i++ {
-		ch <- true
-		go func(v int, ch chan bool) {
-			if v%2 == 0 {
-				queue.Enqueue(v)
-			} else {
-				queue.Dequeue()
+	for i := 0; i < numThreads; i++ {
+		go func() {
+			for j := 0; j < numTimes; j++ {
+				if j%2 == 0 {
+					queue.Enqueue(j)
+				} else {
+					queue.Dequeue()
+				}
+
+				doneChan <- true
 			}
-
-			doneChan <- true
-			<-ch
-		}(i, ch)
+		}()
 	}
 
-	for j := 0; j < numTimes; j++ {
+	for n := 0; n < numTimes*numThreads; n++ {
 		<-doneChan
 	}
 

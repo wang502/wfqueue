@@ -2,55 +2,71 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/wang502/wfqueue"
 )
 
-func main() {
-	numThreads := 10
+func enqueueItems() {
+	numItems, _ := strconv.Atoi(os.Args[1])
+	numThreads, _ := strconv.Atoi(os.Args[2])
+
 	queue := wfqueue.NewWFQueue(numThreads)
+	doneChan := make(chan bool, numItems)
+	start := time.Now()
+	ch := make(chan bool, numThreads)
 
-	fmt.Printf("queue size: %d\n", queue.Len())
-	done := make(chan bool, numThreads)
-	for i := 0; i < 10; i++ {
-		go func(val, tid int) {
-			queue.Enqueue(val, tid)
-			done <- true
-		}(i, i)
+	for i := 0; i < numItems; i++ {
+		ch <- true
+		go func(v int, ch chan bool) {
+			queue.Enqueue(v, v%numThreads)
+			doneChan <- true
+			<-ch
+		}(i, ch)
 	}
-	for i := 0; i < numThreads; i++ {
-		fmt.Println(<-done)
-	}
-	close(done)
-	fmt.Printf("queue: %s\n", queue)
-	fmt.Printf("queue size: %d\n", queue.Len())
 
-	ch := make(chan int, numThreads)
-	for i := 0; i < 10; i++ {
-		go func(tid int) {
-			v, ok := queue.Dequeue(tid)
-			if ok {
-				ch <- v
+	for j := 0; j < numItems; j++ {
+		<-doneChan
+	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("[WF][%d threads][%d items] enqueue takes %fs\n", numThreads, numItems, elapsed.Seconds())
+}
+
+func enqueueDequeuePair() {
+	numTimes, _ := strconv.Atoi(os.Args[1])
+	numThreads, _ := strconv.Atoi(os.Args[2])
+
+	queue := wfqueue.NewWFQueue(numThreads)
+	doneChan := make(chan bool, numTimes)
+	start := time.Now()
+	ch := make(chan bool, numThreads)
+
+	for i := 0; i < numTimes; i++ {
+		ch <- true
+		go func(v int, ch chan bool) {
+			if v%2 == 0 {
+				queue.Enqueue(v, v%numThreads)
+			} else {
+				queue.Dequeue(v % numThreads)
 			}
-		}(i)
-	}
-	for i := 0; i < numThreads; i++ {
-		fmt.Printf("dequeued: %d\n", <-ch)
-	}
-	fmt.Printf("queue: %s\n", queue)
-	fmt.Printf("queue size: %d\n", queue.Len())
-	close(ch)
 
-	fmt.Printf("enqueue: 10\n")
-	queue.Enqueue(10, 0)
-	fmt.Printf("queue: %s\n", queue)
-	fmt.Printf("queue size: %d\n", queue.Len())
-	fmt.Printf("head: %d\n", queue.Head())
-	fmt.Printf("tail: %d\n", queue.Tail())
-
-	v, ok := queue.Dequeue(1)
-	if ok {
-		fmt.Printf("dequeued: %d\n", v)
+			doneChan <- true
+			<-ch
+		}(i, ch)
 	}
-	fmt.Printf("queue: %s\n", queue)
+
+	for j := 0; j < numTimes; j++ {
+		<-doneChan
+	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("[WF][%d threads][%d times enqueue/dequeue pair] takes %fs\n", numThreads, numTimes, elapsed.Seconds())
+}
+
+func main() {
+	//enqueueItems()
+	enqueueDequeuePair()
 }

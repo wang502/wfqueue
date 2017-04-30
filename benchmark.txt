@@ -1,5 +1,49 @@
-BenchmarkLFQueueConcurrentEnqueue10Items-4        300000              5525 ns/op
-BenchmarkLFQueueConcurrentEnqueue100Items-4        10000            191915 ns/op
-BenchmarkLFQueueConcurrentEnqueue1000Items-4        2000           4726357 ns/op
-BenchmarkLFQueueConcurrentEnqueue10000Items-4                100         380942638 ns/op
-BenchmarkLFQueueConcurrentEnqueue100000Items-4                20         104126073 ns/op
+Enqueue 1000 items
+WFQueue
+10,0.085317
+20,0.092627
+30,0.099964
+40,0.116699
+50,0.123422
+60,0.152770
+70,0.156892
+80,0.149319
+90,0.147916
+100,0.153510
+
+LFQueue
+10,0.000869
+20,0.000863
+30,0.000868
+40,0.000906
+50,0.000925
+60,0.001025
+70,0.000951
+80,0.001137
+90,0.001209
+100,0.001566
+
+Enqueu-dequeue 1000items (50% enqueue, 50% dequeue)
+WFQueue
+10,0.095414
+20,0.100149
+30,0.102813
+40,0.103298
+50,0.110384
+60,0.122278
+70,0.126606
+80,0.128785
+90,0.122801
+100,0.135197
+
+LFQueue
+10,0.000933
+20,0.000942
+30,0.000955
+40,0.000943
+50,0.000963
+60,0.000966
+70,0.000971
+80,0.000976
+90,0.000982
+100,0.000987

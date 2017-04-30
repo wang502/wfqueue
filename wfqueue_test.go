@@ -186,6 +186,7 @@ func BenchmarkWFQueueEnqueueDequeue(b *testing.B) {
 	}
 }
 
+/*
 func BenchmarkWFQueueConcurrentEnqueue10Items(b *testing.B) {
 	benchmarkWFQueueConcurrentEnqueue(10, 2, b)
 }
@@ -200,6 +201,31 @@ func BenchmarkWFQueueConcurrentEnqueue1000Items(b *testing.B) {
 
 func BenchmarkWFQueueConcurrentEnqueue10000Items(b *testing.B) {
 	benchmarkWFQueueConcurrentEnqueue(10000, 2, b)
+}
+
+func benchmarkWFQueueConcurrentEnqueue(numItems, numThreads int, b *testing.B) {
+	qs := make([]*WFQueue, b.N)
+	for i := 0; i < b.N; i++ {
+		qs[i] = NewWFQueue(numThreads)
+	}
+
+	b.ResetTimer()
+	queue := NewWFQueue(numThreads)
+	total := b.N * numItems
+	doneChan := make(chan bool, total)
+	for i := 0; i < b.N; i++ {
+		//queue := qs[i]
+		go func(tid int, queue *WFQueue) {
+			for j := 0; j < numItems; j++ {
+				queue.Enqueue(j, tid%numThreads)
+				doneChan <- true
+			}
+		}(i, queue)
+	}
+
+	for k := 0; k < total; k++ {
+		<-doneChan
+	}
 }
 
 func benchmarkWFQueueConcurrentEnqueue(numItems, numThreads int, b *testing.B) {
@@ -243,3 +269,4 @@ func BenchmarkWFQueueConcurrrentEnqueue1000MaxThreads(b *testing.B) {
 func BenchmarkWFQueueConcurrrentEnqueue10000MaxThreads(b *testing.B) {
 	benchmarkWFQueueConcurrentEnqueue(100, 10000, b)
 }
+*/

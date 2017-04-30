@@ -2,38 +2,71 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/wang502/wfqueue"
 )
 
-func main() {
-	numThreads := 10
+func enqueueItems() {
+	numItems, _ := strconv.Atoi(os.Args[1])
+	numThreads, _ := strconv.Atoi(os.Args[2])
+
 	queue := wfqueue.NewLFQueue()
+	doneChan := make(chan bool, numItems)
+	start := time.Now()
+	ch := make(chan bool, numThreads)
 
-	done := make(chan bool, numThreads)
-	for i := 0; i < 10; i++ {
-		go func(val, tid int) {
-			queue.Enqueue(val)
-			done <- true
-		}(i, i)
+	for i := 0; i < numItems; i++ {
+		ch <- true
+		go func(v int, ch chan bool) {
+			queue.Enqueue(v)
+			doneChan <- true
+			<-ch
+		}(i, ch)
 	}
 
-	for i := 0; i < numThreads; i++ {
-		fmt.Println(<-done)
+	for j := 0; j < numItems; j++ {
+		<-doneChan
 	}
-	close(done)
-	fmt.Printf("queue: %s\n", queue)
 
-	ch := make(chan int, numThreads)
-	for i := 0; i < 10; i++ {
-		go func(tid int) {
-			v, ok := queue.Dequeue()
-			if ok {
-				ch <- v
+	elapsed := time.Since(start)
+	fmt.Printf("[LF][%d threads][%d items] enqueue takes %fs\n", numThreads, numItems, elapsed.Seconds())
+}
+
+func enqueueDequeuePair() {
+	numTimes, _ := strconv.Atoi(os.Args[1])
+	numThreads, _ := strconv.Atoi(os.Args[2])
+
+	queue := wfqueue.NewLFQueue()
+	doneChan := make(chan bool, numTimes)
+	start := time.Now()
+	ch := make(chan bool, numThreads)
+
+	for i := 0; i < numTimes; i++ {
+		ch <- true
+		go func(v int, ch chan bool) {
+			if v%2 == 0 {
+				queue.Enqueue(v)
+			} else {
+				queue.Dequeue()
 			}
-		}(i)
+
+			doneChan <- true
+			<-ch
+		}(i, ch)
 	}
-	for i := 0; i < numThreads; i++ {
-		fmt.Printf("dequeued: %d\n", <-ch)
+
+	for j := 0; j < numTimes; j++ {
+		<-doneChan
 	}
+
+	elapsed := time.Since(start)
+	fmt.Printf("[LF][%d threads][%d times enqueue/dequeue pair] takes %fs\n", numThreads, numTimes, elapsed.Seconds())
+}
+
+func main() {
+	//enqueueItems()
+	enqueueDequeuePair()
 }

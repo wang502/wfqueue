@@ -20,6 +20,7 @@ func enqueueItems() {
 	for i := 0; i < numThreads; i++ {
 		go func(tid int) {
 			for j := 0; j < numItems; j++ {
+				fmt.Printf("thread %d tries to enqueue\n", tid)
 				queue.Enqueue(j, tid)
 				doneChan <- true
 			}
@@ -28,6 +29,7 @@ func enqueueItems() {
 
 	for n := 0; n < numItems*numThreads; n++ {
 		<-doneChan
+		fmt.Printf("finished an operation, n:%d\n", n)
 	}
 	elapsed := time.Since(start)
 	fmt.Printf("[WF][%d threads] each enqueue [%d items] takes total %fs\n", numThreads, numItems, elapsed.Seconds())
@@ -98,6 +100,6 @@ func enqueueDequeuePairII() {
 }
 
 func main() {
-	//enqueueItems()
-	enqueueDequeuePairII()
+	enqueueItems()
+	//enqueueDequeuePairII()
 }
